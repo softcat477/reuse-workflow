@@ -1,0 +1,51 @@
+name: A Reusable workflow
+on:
+  workflow_call: # Required syntax for a reusable workflow
+    inputs:
+      input1:
+        required: true
+        type: string
+    secrets:
+      secret1:
+        required: true
+    outputs:
+      reuse-workflow-out1:
+        description: "The first output from reuse-workflow"
+        value: ${{jobs.make_output.outputs.job-output1}}
+      reuse-workflow-out2:
+        description: "The second output from reuse-workflow"
+        value: ${{jobs.make_output.outputs.job-output2}}
+
+jobs:
+  show_input:
+    name: Show input1
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Input to reuse-workflow.yml is:${{ inputs.input1 }}"
+
+  show_secret:
+    name: Show secrets
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Secrets in reuse-workflow.yml is:${{ secrets.secret1 }}"
+
+  make_output:
+    outputs:
+      job-output1: ${{steps.step-singleline.outputs.output1}}
+      job-output2: ${{steps.step-multiline.outputs.output2}}
+    name: Make an output
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump singleline output
+        id: step-singleline
+        run: echo "output1=single-line-output1-from-reuse-workflow.yml" >> "$GITHUB_OUTPUT"
+
+      # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+      - name: Dump multiline output
+        id: step-multiline
+        run: |
+          {
+            echo 'output2<<EOF'
+            curl https://example.com
+            echo EOF
+          } >> "$GITHUB_OUTPUT"

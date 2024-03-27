@@ -1,0 +1,21 @@
+name: A Failed Reusable Workflow
+on:
+  workflow_call: # Required syntax for a reusable workflow
+
+jobs:
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#using-inputs-and-secrets-in-a-reusable-workflow
+  # Secrets are not passed from the caller workflow. The reusable workflow cannot access it.run-name: 
+  # Solution: add on.secrets.<secret name> and pass the secret in the caller workflow
+  fail-to-show-secret:
+    name: Fail to show secret
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Cannot access Secret secret1 in failed-reuse-workflow.yml:${{ secrets.secret1 }}"
+
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#limitations
+  # Environment variables in the caller workflow are not accessable in the called workflow
+  fail-to-show-environment-variable:
+    name: Fail to show environment variables
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Cannot access Environment variables env1 in failed-reuse-workflow.yml:${{ env.env1 }}"
